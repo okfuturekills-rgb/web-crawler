@@ -419,3 +419,17 @@ with plain_session() as session:
 쿠키 파일은 `.gitignore`의 `**/cookies*.json` 패턴으로 자동 차단된다. 전용 프로필 창에서
 받은 상태를 저장했다면 **대상 도메인분만 골라** 넣는다 — 다른 사이트 세션까지 프로젝트
 폴더로 들어오지 않게.
+
+<!-- HERMES-INTEGRATION:START -->
+## Hermes 공용 메모리 연동
+
+이 프로젝트의 작업 루트는 C:\.Workspace\Agents\Web-crawler이며 활성 학습 메모리의 단일 기준 위치는 C:\.Workspace\Hermes_memory이다.
+
+- Codex, ChatGPT Work, 코워크, 클로드 코드의 비단순 작업 전에 C:\.Workspace\Hermes_memory\AGENTS.md, memory\USER.md, memory\MEMORY.md를 읽고 따른다.
+- 완료된 비단순 작업은 C:\.Workspace\Hermes_memory\.agents\skills\workspace-learning-loop\scripts\record-session.ps1로 기록한다.
+- 출처는 Codex:C:\.Workspace\Agents\Web-crawler, Work:C:\.Workspace\Agents\Web-crawler, Cowork:C:\.Workspace\Agents\Web-crawler, ClaudeCode:C:\.Workspace\Agents\Web-crawler 중 실제 작업 표면에 맞는 태그를 사용한다.
+- ChatGPT Work는 이 프로젝트 루트를 로컬 프로젝트의 주 폴더로 지정하고 Edit project > Add folder로 C:\.Workspace\Hermes_memory를 보조 폴더에 연결한 뒤 Work locally로 실행한다.
+- 코워크는 이 프로젝트 루트와 C:\.Workspace\Hermes_memory를 세션에 연결한다.
+- 지속 기억·후보·감사 기록·공통 절차는 Hermes 정본에만 저장하고 이 프로젝트에 별도의 활성 메모리 트리를 만들지 않는다.
+- Hermes 파일은 ChatGPT 계정·워크스페이스 내장 메모리와 자동 동기화되지 않는다.
+<!-- HERMES-INTEGRATION:END -->

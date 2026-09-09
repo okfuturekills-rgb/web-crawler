@@ -96,3 +96,17 @@ python scripts\preflight.py              # 검증: core / agent-browser 분리 P
 | 안티봇(Akamai/Cloudflare/SPA 세션) | `.agents/skills/web-crawler/references/antibot-strategies.md` |
 | 수집 실패 진단 | `.agents/skills/web-crawler/references/troubleshooting.md` |
 | 프로젝트 규칙·도구 분리 SSOT | `CLAUDE.md` |
+
+<!-- HERMES-INTEGRATION:START -->
+## Hermes 공용 메모리 연동
+
+이 프로젝트의 작업 루트는 C:\.Workspace\Agents\Web-crawler이며 활성 학습 메모리의 단일 기준 위치는 C:\.Workspace\Hermes_memory이다.
+
+- Codex, ChatGPT Work, 코워크, 클로드 코드의 비단순 작업 전에 C:\.Workspace\Hermes_memory\AGENTS.md, memory\USER.md, memory\MEMORY.md를 읽고 따른다.
+- 완료된 비단순 작업은 C:\.Workspace\Hermes_memory\.agents\skills\workspace-learning-loop\scripts\record-session.ps1로 기록한다.
+- 출처는 Codex:C:\.Workspace\Agents\Web-crawler, Work:C:\.Workspace\Agents\Web-crawler, Cowork:C:\.Workspace\Agents\Web-crawler, ClaudeCode:C:\.Workspace\Agents\Web-crawler 중 실제 작업 표면에 맞는 태그를 사용한다.
+- ChatGPT Work는 이 프로젝트 루트를 로컬 프로젝트의 주 폴더로 지정하고 Edit project > Add folder로 C:\.Workspace\Hermes_memory를 보조 폴더에 연결한 뒤 Work locally로 실행한다.
+- 코워크는 이 프로젝트 루트와 C:\.Workspace\Hermes_memory를 세션에 연결한다.
+- 지속 기억·후보·감사 기록·공통 절차는 Hermes 정본에만 저장하고 이 프로젝트에 별도의 활성 메모리 트리를 만들지 않는다.
+- Hermes 파일은 ChatGPT 계정·워크스페이스 내장 메모리와 자동 동기화되지 않는다.
+<!-- HERMES-INTEGRATION:END -->

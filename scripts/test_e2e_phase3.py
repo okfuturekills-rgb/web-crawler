@@ -1,7 +1,12 @@
 """Phase 3 E2E 통합 테스트: DynamicFetcher + StealthyFetcher + 에스컬레이션"""
 import json
 import os
+import shutil
+import subprocess
 import sys
+import uuid
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(__file__))
 from utils import RateLimiter, setup_logger, sanitize_filename
@@ -9,7 +14,48 @@ from export_excel import export_to_excel
 from datetime import datetime
 
 
-def test_e2e_dynamic_fetcher(tmp_path):
+@pytest.fixture(scope="module")
+def dynamic_cdp_url():
+    """Use a CA-trusting browser for HTTPS tests behind the cloud proxy."""
+    ca_cert = os.environ.get("CODEX_PROXY_CERT")
+    if not ca_cert:
+        yield None
+        return
+
+    agent_browser = shutil.which("agent-browser")
+    if not agent_browser:
+        pytest.fail("agent-browser is required when CODEX_PROXY_CERT is set")
+
+    session = f"crawler-e2e-{uuid.uuid4().hex}"
+    command = [agent_browser, "--session", session]
+    try:
+        subprocess.run(
+            [*command, "--ca-cert", ca_cert, "open", "https://quotes.toscrape.com/js/"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        result = subprocess.run(
+            [*command, "get", "cdp-url"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        cdp_url = result.stdout.strip()
+        assert cdp_url, "agent-browser returned an empty CDP URL"
+        yield cdp_url
+    finally:
+        subprocess.run(
+            [*command, "close"],
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+
+
+def test_e2e_dynamic_fetcher(tmp_path, dynamic_cdp_url):
     """DynamicFetcher로 JS 렌더링이 필요한 사이트를 수집하여 엑셀로 출력.
 
     quotes.toscrape.com/js/ 는 JavaScript로 데이터를 렌더링하는 버전.
@@ -42,7 +88,7 @@ def test_e2e_dynamic_fetcher(tmp_path):
         url = f"https://quotes.toscrape.com/js/page/{page_num}/"
         logger.info(f"Rendering page {page_num}: {url}")
 
-        page = dynamic.fetch(url, network_idle=True)
+        page = dynamic.fetch(url, network_idle=True, cdp_url=dynamic_cdp_url)
         if page.status != 200:
             logger.warning(f"Status {page.status}, stopping")
             break
@@ -102,7 +148,7 @@ def test_e2e_dynamic_fetcher(tmp_path):
     logger.info("=== DynamicFetcher Test PASSED ===")
 
 
-def test_e2e_escalation_chain():
+def test_e2e_escalation_chain(dynamic_cdp_url):
     """에스컬레이션 체인: Fetcher 실패 → StealthyFetcher → DynamicFetcher 자동 전환.
 
     quotes.toscrape.com/js/ 는 JS 렌더링 필요 → Fetcher 부분 실패 → 에스컬레이션.
@@ -121,7 +167,9 @@ def test_e2e_escalation_chain():
     FETCHER_CHAIN = [
         ("plain_get", plain_get),
         ("plain_session", _session_tier),
-        ("DynamicFetcher", lambda url: DynamicFetcher().fetch(url, network_idle=True)),
+        ("DynamicFetcher", lambda url: DynamicFetcher().fetch(
+            url, network_idle=True, cdp_url=dynamic_cdp_url
+        )),
     ]
 
     def fetch_with_escalation(url: str):
